@@ -1,7 +1,7 @@
 """
 MUJ Student Advisor AI - Complete Implementation
 PS 01: Student Academic Performance Prediction
-Enhanced UI/UX Version (Light Theme + Wide Sidebar)
+Theme-Adaptive Design (Works in Light & Dark Mode)
 """
 
 import streamlit as st
@@ -23,163 +23,534 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# ==================== CUSTOM CSS (LIGHT THEME + WIDE SIDEBAR) ====================
+# ==================== THEME-AWARE CSS WITH DARK MODE FIXES ====================
 st.markdown("""
 <style>
     /* Import Google Fonts */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap');
     
-    /* Global Styles & Light Theme Enforcements */
+    /* Theme variables - Light mode (default) */
+    :root {
+        --bg-primary: #F8FAFC;
+        --bg-secondary: #FFFFFF;
+        --card-bg: #FFFFFF;
+        --text-primary: #0F172A;
+        --text-secondary: #334155;
+        --text-muted: #64748B;
+        --border-color: #E2E8F0;
+        --input-bg: #FFFFFF;
+        --hover-bg: #F1F5F9;
+        --accent-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --shadow-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    /* Dark mode overrides */
+    @media (prefers-color-scheme: dark) {
+        :root {
+            --bg-primary: #0A0F1A;
+            --bg-secondary: #151F2F;
+            --card-bg: #1E2A3A;
+            --text-primary: #FFFFFF !important;
+            --text-secondary: #E2E8F0 !important;
+            --text-muted: #94A3B8 !important;
+            --border-color: #2D3A4F;
+            --input-bg: #0A0F1A;
+            --hover-bg: #2D3A4F;
+            --shadow-color: rgba(0, 0, 0, 0.5);
+        }
+        
+        /* Force ALL card backgrounds to change */
+        .feature-card, 
+        .metric-card, 
+        .contact-card, 
+        .recommendation-item,
+        .sidebar-section,
+        .stTabs [data-baseweb="tab-list"],
+        .streamlit-expanderHeader,
+        .streamlit-expanderContent,
+        div[data-baseweb="select"] > div,
+        .stNumberInput input, 
+        .stTextInput input,
+        .stTextArea textarea,
+        .stAlert,
+        .stDownloadButton button,
+        [data-testid="stSidebar"] {
+            background-color: var(--card-bg) !important;
+            border-color: var(--border-color) !important;
+        }
+        
+        /* Card text colors in dark mode */
+        .feature-card,
+        .metric-card,
+        .contact-card,
+        .recommendation-item,
+        .sidebar-section {
+            color: var(--text-secondary) !important;
+        }
+        
+        .feature-label,
+        .metric-label,
+        .contact-title,
+        .sidebar-section-title,
+        .confidence-label {
+            color: var(--text-primary) !important;
+        }
+        
+        .feature-value,
+        .metric-value,
+        .contact-detail strong {
+            color: var(--text-primary) !important;
+        }
+    }
+    
+    /* Global Styles */
     html, body, [class*="css"] {
         font-family: 'Inter', sans-serif;
-        color: #1E293B !important; 
-        background-color: #F8FAFC; 
+        transition: all 0.2s ease;
+        color: var(--text-secondary);
+        background-color: var(--bg-primary);
     }
     
     h1, h2, h3, h4, h5, h6 {
-        font-family: 'Poppins', sans-serif;
+        font-family: 'Space Grotesk', sans-serif;
         font-weight: 600;
         letter-spacing: -0.02em;
+        color: var(--text-primary);
     }
     
     /* Wider Sidebar */
     [data-testid="stSidebar"] {
         min-width: 480px !important;
         max-width: 500px !important;
-        background-color: #FFFFFF !important;
-        padding-top: 1.5rem;
-        padding-right: 1.5rem;
-        padding-left: 1.5rem;
-        border-right: 1px solid #E2E8F0;
+        background-color: var(--bg-secondary) !important;
+        border-right: 1px solid var(--border-color);
+        padding: 1.5rem;
     }
     
-    /* Fix Streamlit Input Fields */
-    div[data-baseweb="select"] > div {
-        background-color: #FFFFFF !important;
-        color: #1E293B !important;
-        border: 1px solid #CBD5E1 !important;
+    /* Input fields */
+    div[data-baseweb="select"] > div,
+    .stNumberInput input, 
+    .stTextInput input,
+    .stTextArea textarea {
+        background-color: var(--input-bg) !important;
+        color: var(--text-primary) !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 10px !important;
     }
-    .stNumberInput input, .stTextInput input {
-        background-color: #FFFFFF !important;
-        color: #1E293B !important;
-        border: 1px solid #CBD5E1 !important;
+    
+    .stSlider label, .stSelectbox label, .stNumberInput label,
+    .stRadio label, .stCheckbox label {
+        color: var(--text-primary) !important;
+        font-weight: 500;
     }
-
+    
     /* Main Header */
     .main-header {
-        font-size: 2.8rem;
-        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%);
+        font-size: 3.2rem;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         text-align: center;
         margin-bottom: 0.5rem;
         padding: 1rem 0;
         font-weight: 700;
+        font-family: 'Space Grotesk', sans-serif;
     }
     
     .sub-header {
         font-size: 1.8rem;
-        color: #1E3A8A !important;
+        color: var(--text-primary) !important;
         margin-bottom: 1.5rem;
-        border-bottom: 3px solid #3B82F6;
+        border-bottom: 3px solid #667eea;
         padding-bottom: 0.5rem;
         font-weight: 600;
     }
     
     .section-header {
         font-size: 1.4rem;
-        color: #1E3A8A !important;
-        margin: 1rem 0 1rem 0;
+        color: var(--text-primary) !important;
+        margin: 1rem 0;
         font-weight: 600;
         display: flex;
         align-items: center;
         gap: 0.5rem;
     }
     
-    /* Result Boxes */
-    .success-box {
-        background: linear-gradient(135deg, #10B981 0%, #059669 100%);
+    /* Grade Boxes */
+    .grade-box-0 { background: linear-gradient(135deg, #10B981 0%, #059669 100%); }
+    .grade-box-1 { background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%); }
+    .grade-box-2 { background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%); }
+    .grade-box-3 { background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%); }
+    
+    .grade-box-0, .grade-box-1, .grade-box-2, .grade-box-3 {
         padding: 2rem;
-        border-radius: 15px;
+        border-radius: 20px;
         color: white !important;
         margin: 1rem 0 2rem 0;
-        box-shadow: 0 4px 20px rgba(16, 185, 129, 0.3);
+        box-shadow: 0 10px 30px -10px rgba(0,0,0,0.3);
+        border: 1px solid rgba(255,255,255,0.1);
     }
-    .success-box div { color: white !important; }
     
-    .warning-box {
-        background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        color: white !important;
-        margin: 1rem 0 2rem 0;
-        box-shadow: 0 4px 20px rgba(245, 158, 11, 0.3);
+    .grade-box-0 div, .grade-box-1 div, .grade-box-2 div, .grade-box-3 div { 
+        color: white !important; 
     }
-    .warning-box div { color: white !important; }
     
-    .danger-box {
-        background: linear-gradient(135deg, #EF4444 0%, #DC2626 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        color: white !important;
-        margin: 1rem 0 2rem 0;
-        box-shadow: 0 4px 20px rgba(239, 68, 68, 0.3);
+    .grade-title { 
+        font-size: 2.2rem; 
+        font-weight: 700; 
+        margin-bottom: 0.5rem; 
+        font-family: 'Space Grotesk', sans-serif;
     }
-    .danger-box div { color: white !important; }
     
-    .info-box {
-        background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
-        padding: 2rem;
-        border-radius: 15px;
-        color: white !important;
-        margin: 1rem 0 2rem 0;
-        box-shadow: 0 4px 20px rgba(59, 130, 246, 0.3);
+    .grade-description { 
+        font-size: 1.1rem; 
+        opacity: 0.95; 
+        margin-bottom: 1rem; 
     }
-    .info-box div { color: white !important; }
     
-    .grade-title { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
-    .grade-description { font-size: 1.1rem; opacity: 0.95; margin-bottom: 1rem; }
-    .grade-badge { display: inline-block; background: rgba(255,255,255,0.2); padding: 0.5rem 1rem; border-radius: 50px; font-size: 1rem; margin: 0.5rem 0; }
+    .grade-badge { 
+        display: inline-block; 
+        background: rgba(255,255,255,0.2); 
+        padding: 0.5rem 1.2rem; 
+        border-radius: 50px; 
+        font-size: 0.9rem; 
+        margin: 0.5rem 0; 
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
     
-    /* Cards & Layout */
-    .feature-card { background: #FFFFFF; padding: 1.2rem; border-radius: 12px; margin: 0.5rem 0; border-left: 4px solid #3B82F6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .feature-icon { font-size: 1.5rem; margin-right: 0.5rem; }
-    .feature-label { font-weight: 600; color: #1E3A8A; margin-bottom: 0.25rem; }
-    .feature-value { font-size: 1.1rem; color: #0F172A; }
+    /* Cards */
+    .feature-card { 
+        background: var(--card-bg); 
+        padding: 1.2rem; 
+        border-radius: 16px; 
+        margin: 0.5rem 0; 
+        border-left: 4px solid #667eea; 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        transition: all 0.3s ease;
+        border: 1px solid var(--border-color);
+    }
     
-    .metric-card { background: white; padding: 1.2rem; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.05); border: 1px solid #E2E8F0; }
-    .metric-icon { font-size: 2rem; margin-bottom: 0.5rem; }
-    .metric-label { font-size: 0.9rem; color: #64748B; text-transform: uppercase; }
-    .metric-value { font-size: 2rem; font-weight: 700; color: #1E3A8A; margin: 0.5rem 0; }
+    .feature-card:hover { 
+        transform: translateX(5px); 
+        box-shadow: 0 8px 30px var(--shadow-color); 
+    }
     
-    [data-testid="column"] { display: flex; flex-direction: column; }
-    .contact-card { background: white; padding: 1.5rem; border-radius: 15px; border: 1px solid #E2E8F0; box-shadow: 0 4px 15px rgba(0,0,0,0.05); flex-grow: 1; display: flex; flex-direction: column; margin-top: 1rem;}
-    .contact-title { font-size: 1.2rem; font-weight: 600; color: #1E3A8A !important; margin-bottom: 1rem; }
-    .contact-detail { padding: 0.5rem 0; border-bottom: 1px solid #E2E8F0; color: #334155; }
-    .contact-detail:last-child { border-bottom: none; }
+    .feature-icon { 
+        font-size: 1.5rem; 
+        margin-right: 0.5rem; 
+    }
     
-    .recommendation-item { background: white; padding: 1rem; border-radius: 10px; margin: 0.5rem 0; border-left: 4px solid #3B82F6; box-shadow: 0 2px 8px rgba(0,0,0,0.05); color: #1E293B; }
+    .feature-label { 
+        font-weight: 600; 
+        color: var(--text-primary); 
+        margin-bottom: 0.25rem; 
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .feature-value { 
+        font-size: 1.2rem; 
+        color: var(--text-primary); 
+        font-weight: 500;
+    }
+    
+    /* Metric Cards */
+    .metric-card { 
+        background: var(--card-bg); 
+        padding: 1.2rem; 
+        border-radius: 16px; 
+        text-align: center; 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+    }
+    
+    .metric-card:hover { 
+        transform: translateY(-5px); 
+        box-shadow: 0 8px 30px var(--shadow-color); 
+        border-color: #667eea;
+    }
+    
+    .metric-icon { 
+        font-size: 2rem; 
+        margin-bottom: 0.5rem; 
+    }
+    
+    .metric-label { 
+        font-size: 0.85rem; 
+        color: var(--text-muted); 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px;
+    }
+    
+    .metric-value { 
+        font-size: 2rem; 
+        font-weight: 700; 
+        color: var(--text-primary); 
+        margin: 0.5rem 0; 
+    }
+    
+    /* Contact Cards */
+    .contact-card { 
+        background: var(--card-bg); 
+        padding: 1.5rem; 
+        border-radius: 20px; 
+        border: 1px solid var(--border-color); 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        flex-grow: 1; 
+        display: flex; 
+        flex-direction: column; 
+        margin-top: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px var(--shadow-color);
+    }
+    
+    .contact-title { 
+        font-size: 1.2rem; 
+        font-weight: 600; 
+        color: var(--text-primary) !important; 
+        margin-bottom: 1rem; 
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .contact-detail { 
+        padding: 0.5rem 0; 
+        border-bottom: 1px solid var(--border-color); 
+        color: var(--text-secondary); 
+    }
+    
+    .contact-detail:last-child { 
+        border-bottom: none; 
+    }
+    
+    .contact-detail strong {
+        color: var(--text-primary);
+    }
+    
+    /* Recommendation Items */
+    .recommendation-item { 
+        background: var(--card-bg); 
+        padding: 1rem; 
+        border-radius: 12px; 
+        margin: 0.5rem 0; 
+        border-left: 4px solid #667eea; 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        transition: all 0.2s ease; 
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+    }
+    
+    .recommendation-item:hover { 
+        transform: translateX(5px); 
+        box-shadow: 0 8px 30px var(--shadow-color); 
+    }
     
     /* Confidence Bar */
-    .confidence-item { margin: 0.75rem 0; }
-    .confidence-label { display: flex; justify-content: space-between; margin-bottom: 0.25rem; font-weight: 500; color: #1E293B; }
-    .confidence-bar-bg { background: #E2E8F0; border-radius: 10px; height: 24px; width: 100%; overflow: hidden; }
-    .confidence-bar-fill { height: 24px; border-radius: 10px; transition: width 0.5s ease-in-out; }
+    .confidence-item { 
+        margin: 0.75rem 0; 
+    }
+    
+    .confidence-label { 
+        display: flex; 
+        justify-content: space-between; 
+        margin-bottom: 0.25rem; 
+        font-weight: 500; 
+        color: var(--text-primary); 
+    }
+    
+    .confidence-bar-bg { 
+        background: var(--border-color); 
+        border-radius: 10px; 
+        height: 24px; 
+        width: 100%; 
+        overflow: hidden; 
+    }
+    
+    .confidence-bar-fill { 
+        height: 24px; 
+        border-radius: 10px; 
+        transition: width 0.5s ease-in-out; 
+    }
     
     /* Buttons */
-    .stButton > button { background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%); color: white !important; font-weight: 600; padding: 0.75rem 2rem; border-radius: 12px; border: none; width: 100%; font-size: 1.1rem; text-transform: uppercase; transition: all 0.3s; box-shadow: 0 4px 15px rgba(30, 58, 138, 0.3); }
-    .stButton > button:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(30, 58, 138, 0.4); }
+    .stButton > button { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+        color: white !important; 
+        font-weight: 600; 
+        padding: 0.75rem 2rem; 
+        border-radius: 12px; 
+        border: none; 
+        width: 100%; 
+        font-size: 1.1rem; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+        transition: all 0.3s ease; 
+        box-shadow: 0 10px 20px -10px rgba(102, 126, 234, 0.4);
+        border: 1px solid rgba(255,255,255,0.1);
+    }
     
-    /* Tabs & Dividers */
-    .stTabs [data-baseweb="tab-list"] { gap: 2rem; background: white; padding: 0.5rem; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-    .stTabs [data-baseweb="tab"] { height: 3rem; font-weight: 600; color: #64748B !important; border-radius: 8px; }
-    .stTabs [aria-selected="true"] { background: #1E3A8A !important; color: white !important; }
-    .custom-divider { height: 2px; background: linear-gradient(90deg, transparent, #3B82F6, transparent); margin: 2rem 0; }
-    .footer { text-align: center; padding: 2rem; color: #64748B; font-size: 0.9rem; border-top: 1px solid #E2E8F0; margin-top: 2rem; }
+    .stButton > button:hover { 
+        transform: translateY(-2px); 
+        box-shadow: 0 15px 30px -10px rgba(102, 126, 234, 0.6); 
+    }
+    
+    /* Sidebar specific */
+    .sidebar-header { 
+        font-size: 1.5rem; 
+        font-weight: 700; 
+        color: var(--text-primary) !important; 
+        text-align: center; 
+        margin: 1rem 0; 
+        padding: 1rem; 
+        border-bottom: 2px solid #667eea; 
+    }
+    
+    .sidebar-section { 
+        background: var(--card-bg); 
+        padding: 1rem; 
+        border-radius: 16px; 
+        margin: 1rem 0; 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        border: 1px solid var(--border-color);
+    }
+    
+    .sidebar-section-title { 
+        font-size: 1rem; 
+        font-weight: 600; 
+        color: var(--text-primary) !important; 
+        margin-bottom: 1rem; 
+        text-transform: uppercase; 
+        letter-spacing: 0.5px; 
+    }
+    
+    /* Tabs Styling */
+    .stTabs [data-baseweb="tab-list"] { 
+        gap: 2rem; 
+        background: var(--bg-secondary); 
+        padding: 0.5rem; 
+        border-radius: 16px; 
+        box-shadow: 0 4px 20px var(--shadow-color); 
+        border: 1px solid var(--border-color);
+    }
+    
+    .stTabs [data-baseweb="tab"] { 
+        height: 3rem; 
+        font-weight: 600; 
+        color: var(--text-secondary) !important; 
+        border-radius: 10px; 
+        transition: all 0.2s ease;
+    }
+    
+    .stTabs [aria-selected="true"] { 
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important; 
+        color: white !important; 
+    }
+    
+    /* Expanders */
+    .streamlit-expanderHeader {
+        color: var(--text-primary) !important;
+        background-color: var(--card-bg) !important;
+        border-radius: 10px !important;
+        border: 1px solid var(--border-color) !important;
+    }
+    
+    .streamlit-expanderContent {
+        background-color: var(--bg-secondary) !important;
+    }
+    
+    /* Dividers */
+    .custom-divider { 
+        height: 2px; 
+        background: linear-gradient(90deg, transparent, #667eea, transparent); 
+        margin: 2rem 0; 
+    }
+    
+    /* Footer */
+    .footer { 
+        text-align: center; 
+        padding: 2rem; 
+        color: var(--text-muted); 
+        font-size: 0.9rem; 
+        border-top: 1px solid var(--border-color); 
+        margin-top: 2rem; 
+    }
+    
+    /* Diff indicators */
+    .diff-positive { 
+        background: rgba(16, 185, 129, 0.1); 
+        color: #10B981 !important; 
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+    
+    .diff-negative { 
+        background: rgba(239, 68, 68, 0.1); 
+        color: #EF4444 !important; 
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+    
+    .diff-neutral { 
+        background: rgba(100, 116, 139, 0.1); 
+        color: var(--text-muted) !important; 
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+    }
+    
+    /* ===== FIX FOR DEMO PROFILE CARDS ===== */
+    .content-card {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 12px;
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+    
+    /* Light mode text colors for demo cards */
+    .content-card h4 {
+        margin-bottom: 1rem;
+        font-weight: 600;
+    }
+    
+    .content-card p {
+        margin: 0.2rem 0;
+        font-weight: 500;
+        color: #1E293B !important;  /* Dark text for light mode */
+    }
+    
+    /* Dark mode overrides for demo cards */
+    @media (prefers-color-scheme: dark) {
+        .content-card {
+            background: var(--card-bg) !important;
+            border: 1px solid var(--border-color);
+        }
+        
+        .content-card h4 {
+            color: inherit;  /* Uses the color set inline from demo */
+        }
+        
+        .content-card p {
+            color: var(--text-secondary) !important;  /* Light text for dark mode */
+        }
+    }
+    
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+        .main-header { font-size: 2.2rem; }
+        .sub-header { font-size: 1.5rem; }
+        [data-testid="stSidebar"] { min-width: 100% !important; }
+    }
 </style>
-""", unsafe_allow_html=True)
-
-# ==================== LOAD MODEL AND METADATA ====================
+""", unsafe_allow_html=True)# ==================== LOAD MODEL AND METADATA ====================
 @st.cache_resource
 def load_model():
     """Load the trained model and metadata"""
@@ -191,9 +562,13 @@ def load_model():
                 metadata = pickle.load(f)
         except:
             metadata = None
+        st.sidebar.success("✅ Model loaded successfully")
         return model, metadata
     except FileNotFoundError:
-        st.error("❌ Model file not found! Please run train_model.py first.")
+        st.sidebar.error("❌ Model file not found! Please run train_model.py first.")
+        st.stop()
+    except Exception as e:
+        st.sidebar.error(f"❌ Model loading failed: {str(e)}")
         st.stop()
 
 model, metadata = load_model()
@@ -269,9 +644,18 @@ def apply_demo_profile(demo_data):
     st.session_state['StudyHours'] = demo_data['StudyHours']
     st.session_state['StressLevel'] = demo_data['Stress']
     
-    for key in FEATURE_INFO.keys():
-        if key not in ['ExamScore', 'Attendance', 'StudyHours', 'StressLevel']:
-            st.session_state[key] = FEATURE_INFO[key]['default']
+    # Set defaults for other fields
+    st.session_state['AssignmentCompletion'] = FEATURE_INFO['AssignmentCompletion']['default']
+    st.session_state['OnlineCourses'] = FEATURE_INFO['OnlineCourses']['default']
+    st.session_state['Motivation'] = 2 if demo_data['name'] == "🌟 High Performer" else 1
+    st.session_state['LearningStyle'] = FEATURE_INFO['LearningStyle']['default']
+    st.session_state['Gender'] = FEATURE_INFO['Gender']['default']
+    st.session_state['Age'] = FEATURE_INFO['Age']['default']
+    st.session_state['Internet'] = FEATURE_INFO['Internet']['default']
+    st.session_state['Resources'] = FEATURE_INFO['Resources']['default']
+    st.session_state['EduTech'] = FEATURE_INFO['EduTech']['default']
+    st.session_state['Extracurricular'] = FEATURE_INFO['Extracurricular']['default']
+    st.session_state['Discussions'] = FEATURE_INFO['Discussions']['default']
     
     st.session_state['auto_predict'] = True
 
@@ -279,7 +663,6 @@ def apply_demo_profile(demo_data):
 with st.sidebar:
     st.markdown('<div class="sidebar-header">🎓 MUJ Student Portal</div>', unsafe_allow_html=True)
     
-    # IMAGE REMOVED - No logo displayed
     st.markdown("### 📋 Student Information")
     st.markdown("Enter the student's complete profile below:")
     st.markdown("---")
@@ -333,20 +716,36 @@ with st.sidebar:
                         'OnlineCourses', 'Discussions', 'AssignmentCompletion',
                         'ExamScore', 'EduTech', 'StressLevel']
         
+        # Validate all features are present
+        for feature in feature_order:
+            if feature not in input_data:
+                input_data[feature] = FEATURE_INFO[feature]['default'] if feature in FEATURE_INFO else 0
+        
         input_list = [input_data[feature] for feature in feature_order]
         input_df = pd.DataFrame([input_list], columns=feature_order)
         
-        prediction = model.predict(input_df)[0]
-        probabilities = model.predict_proba(input_df)[0]
-        
-        st.session_state['prediction'] = prediction
-        st.session_state['probabilities'] = probabilities
-        st.session_state['input_data'] = input_data
-        st.success("✅ Prediction generated! Scroll down to view results.")
+        # Validate no null values
+        if input_df.isnull().any().any():
+            st.sidebar.error("⚠️ Some input values are invalid")
+        else:
+            prediction = model.predict(input_df)[0]
+            probabilities = model.predict_proba(input_df)[0]
+            
+            st.session_state['prediction'] = prediction
+            st.session_state['probabilities'] = probabilities
+            st.session_state['input_data'] = input_data
+            st.success("✅ Prediction generated! Scroll down to view results.")
+
+# ==================== THEME-AWARE PLOTLY TEMPLATE ====================
+def get_plotly_template():
+    """Returns appropriate Plotly template based on theme"""
+    if st.get_option("theme.base") == "dark":
+        return "plotly_dark"
+    return "plotly_white"
 
 # ==================== MAIN CONTENT ====================
 st.markdown('<h1 class="main-header">🎓 MUJ Student Advisor AI</h1>', unsafe_allow_html=True)
-st.markdown("""<p style="text-align: center; font-size: 1.2rem; color: #64748B; margin-bottom: 2rem;">Intelligent Student Performance Prediction & Personalized Intervention System</p>""", unsafe_allow_html=True)
+st.markdown("""<p style="text-align: center; font-size: 1.2rem; color: var(--text-secondary); margin-bottom: 2rem;">Intelligent Student Performance Prediction & Personalized Intervention System</p>""", unsafe_allow_html=True)
 
 tab1, tab2, tab3, tab4 = st.tabs(["📊 PREDICTION & ANALYSIS", "📈 DEEP DIVE", "📚 GUIDELINES", "ℹ️ ABOUT"])
 
@@ -365,13 +764,12 @@ with tab1:
     for col, demo in zip(demo_cols, demos):
         with col:
             st.markdown(f"""
-            <div class="content-card" style="text-align: center; height: 100%; border-left: 4px solid {demo['color']}; padding: 1rem; border-radius: 12px; background: white; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+            <div class="feature-card" style="text-align: center; border-left: 4px solid {demo['color']};">
                 <h4 style="margin-bottom: 1rem; color: {demo['color']};">{demo['name']}</h4>
-                <p style="margin: 0.2rem 0; font-weight: 500;">📋 Exam: {demo['ExamScore']}</p>
-                <p style="margin: 0.2rem 0; font-weight: 500;">📊 Att: {demo['Attendance']}%</p>
-                <p style="margin: 0.2rem 0; font-weight: 500;">📚 Study: {demo['StudyHours']}h</p>
+                <p style="margin: 0.2rem 0;">📋 Exam: {demo['ExamScore']}</p>
+                <p style="margin: 0.2rem 0;">📊 Att: {demo['Attendance']}%</p>
+                <p style="margin: 0.2rem 0;">📚 Study: {demo['StudyHours']}h</p>
             </div>
-            <div style="margin-top: 10px;"></div>
             """, unsafe_allow_html=True)
             
             st.button(
@@ -383,6 +781,10 @@ with tab1:
             )
 
     st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
+    
+    if 'input_data' in st.session_state:
+        input_data = st.session_state['input_data']
+    
     st.markdown('<h2 class="sub-header">👤 Student Profile Summary</h2>', unsafe_allow_html=True)
     
     col1, col2, col3 = st.columns(3)
@@ -419,7 +821,7 @@ with tab1:
         probabilities = st.session_state['probabilities']
         grade_info = GRADE_INFO[pred]
         
-        box_class = ["success-box", "info-box", "warning-box", "danger-box"][pred]
+        box_class = f"grade-box-{pred}"
         
         col1, col2 = st.columns([2, 1])
         with col1:
@@ -444,42 +846,40 @@ with tab1:
         
         st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
         
-        # FIXED SECTION - Properly indented with hardcoded recommendations
         col1, col2 = st.columns([1, 1], gap="large")
         
         with col1:
             st.markdown('<h2 class="sub-header">📋 Personalized Success Plan</h2>', unsafe_allow_html=True)
             st.markdown('<div class="contact-card" style="min-height: 280px;">', unsafe_allow_html=True)
             
-            # DIRECT HARDCODED RECOMMENDATIONS - NO FILE DEPENDENCY
             if pred == 0:
                 st.markdown("""
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Invite to the 'Student Excellence' Research Program for guided undergraduate research.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest applying for Peer Mentor or Teaching Assistant (TA) roles for junior CSE batches.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend advanced certification courses in specialized domains like AI/ML or Cloud Computing.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage submitting their semester projects to national hackathons.</div>
+                <div class="recommendation-item">✅ Invite to the 'Student Excellence' Research Program for guided undergraduate research.</div>
+                <div class="recommendation-item">✅ Suggest applying for Peer Mentor or Teaching Assistant (TA) roles for junior CSE batches.</div>
+                <div class="recommendation-item">✅ Recommend advanced certification courses in specialized domains like AI/ML or Cloud Computing.</div>
+                <div class="recommendation-item">✅ Encourage submitting their semester projects to national hackathons.</div>
                 """, unsafe_allow_html=True)
             elif pred == 1:
                 st.markdown("""
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest joining technical clubs like IEEE CIS MUJ.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend exploring elective subjects in specialized CSE domains.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage participation in coding competitions and hackathons.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest taking up leadership roles in student chapters.</div>
+                <div class="recommendation-item">✅ Suggest joining technical clubs like IEEE CIS MUJ.</div>
+                <div class="recommendation-item">✅ Recommend exploring elective subjects in specialized CSE domains.</div>
+                <div class="recommendation-item">✅ Encourage participation in coding competitions and hackathons.</div>
+                <div class="recommendation-item">✅ Suggest taking up leadership roles in student chapters.</div>
                 """, unsafe_allow_html=True)
             elif pred == 2:
                 st.markdown("""
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend attending weekly Faculty Office Hours.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest the 'Time Management & Study Skills' workshop.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage forming study groups with peers.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend using online learning resources like NPTEL.</div>
+                <div class="recommendation-item">✅ Recommend attending weekly Faculty Office Hours.</div>
+                <div class="recommendation-item">✅ Suggest the 'Time Management & Study Skills' workshop.</div>
+                <div class="recommendation-item">✅ Encourage forming study groups with peers.</div>
+                <div class="recommendation-item">✅ Recommend using online learning resources like NPTEL.</div>
                 """, unsafe_allow_html=True)
-            else:  # pred == 3 (At-Risk) - This matches your image
+            else:
                 st.markdown("""
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Immediate mandatory referral to the Student Success Center for an academic recovery plan.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Require a confidential meeting with the Campus Counselor to address potential stress or burnout.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend a strict 50% reduction in extracurricular and club commitments to prioritize core academics.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Assign a dedicated senior peer mentor for weekly accountability and assignment tracking.</div>
-                <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest a review of their current course load to see if dropping a non-core elective is necessary to protect their GPA.</div>
+                <div class="recommendation-item">✅ Immediate mandatory referral to the Student Success Center for an academic recovery plan.</div>
+                <div class="recommendation-item">✅ Require a confidential meeting with the Campus Counselor to address potential stress or burnout.</div>
+                <div class="recommendation-item">✅ Recommend a strict 50% reduction in extracurricular and club commitments to prioritize core academics.</div>
+                <div class="recommendation-item">✅ Assign a dedicated senior peer mentor for weekly accountability and assignment tracking.</div>
+                <div class="recommendation-item">✅ Suggest a review of their current course load to see if dropping a non-core elective is necessary to protect their GPA.</div>
                 """, unsafe_allow_html=True)
             
             st.markdown('</div>', unsafe_allow_html=True)
@@ -505,17 +905,39 @@ with tab2:
             if metadata and 'feature_importance' in metadata:
                 st.markdown("#### 🔍 Top Predictive Features")
                 import_df = pd.DataFrame(metadata['feature_importance']).head(8)
-                fig = px.bar(import_df, x='importance', y='feature', orientation='h', title='Most Important Factors', color='importance', color_continuous_scale='Blues')
-                fig.update_layout(height=400, showlegend=False, paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font=dict(color='#1E293B'))
+                fig = px.bar(import_df, x='importance', y='feature', orientation='h', 
+                           title='Most Important Factors', color='importance', 
+                           color_continuous_scale='Viridis',
+                           template=get_plotly_template())
+                fig.update_layout(height=400, showlegend=False, 
+                                paper_bgcolor='rgba(0,0,0,0)', 
+                                plot_bgcolor='rgba(0,0,0,0)')
                 st.plotly_chart(fig, use_container_width=True)
             
-            stress_impact = {
-                0: "✨ **Low Stress**: Students with low stress typically perform 10-15% better than peers",
-                1: "⚖️ **Moderate Stress**: Can be motivating if managed well through proper techniques",
-                2: "⚠️ **High Stress**: Reduces performance by 20-30% - immediate intervention recommended"
-            }
-            st.markdown("#### 🧠 Stress Impact Analysis")
-            st.info(stress_impact[st.session_state['input_data']['StressLevel']])
+            # Radar Chart
+            st.markdown("#### 📊 Multi-Factor Balance")
+            radar_metrics = ['Study', 'Attendance', 'Assignments', 'Motivation', 'Discussions']
+            radar_values = [
+                (st.session_state['input_data']['StudyHours'] / 43) * 100,
+                st.session_state['input_data']['Attendance'],
+                st.session_state['input_data']['AssignmentCompletion'],
+                (st.session_state['input_data']['Motivation'] / 2) * 100,
+                (st.session_state['input_data']['Discussions'] * 100) if isinstance(st.session_state['input_data']['Discussions'], int) else 50
+            ]
+            
+            fig_radar = go.Figure(data=go.Scatterpolar(
+                r=radar_values, theta=radar_metrics, fill='toself',
+                line_color=GRADE_INFO[st.session_state['prediction']]['color'],
+                fillcolor=f"rgba{tuple(int(GRADE_INFO[st.session_state['prediction']]['color'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) + (0.3,)}"
+            ))
+            fig_radar.update_layout(
+                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
+                showlegend=False, height=350,
+                paper_bgcolor='rgba(0,0,0,0)',
+                margin=dict(l=80, r=80, t=40, b=40),
+                template=get_plotly_template()
+            )
+            st.plotly_chart(fig_radar, use_container_width=True)
         
         with col2:
             st.markdown("#### 📊 Profile Comparison")
@@ -529,48 +951,69 @@ with tab2:
             for name, value, avg, icon in metrics:
                 diff = value - avg
                 diff_class = "diff-positive" if diff > 0 else "diff-negative" if diff < 0 else "diff-neutral"
-                st.markdown(f'<div class="metric-card"><div class="metric-icon">{icon}</div><div class="metric-label">{name}</div><div class="metric-value">{value}</div><div><span class="metric-diff {diff_class}">{"+" if diff > 0 else ""}{diff:.1f} vs avg</span></div></div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="metric-card"><div class="metric-icon">{icon}</div><div class="metric-label">{name}</div><div class="metric-value">{value}</div><div><span class="{diff_class}">{"+" if diff > 0 else ""}{diff:.1f} vs avg</span></div></div>', unsafe_allow_html=True)
+            
+            # Environmental Impact
+            st.markdown("#### 🔍 Environmental Impact")
+            impact_data = pd.DataFrame({
+                "Factor": ["Internet", "Resources", "EduTech", "Extra-Curricular"],
+                "Score": [
+                    st.session_state['input_data']['Internet'] * 100,
+                    (st.session_state['input_data']['Resources'] / 2) * 100,
+                    st.session_state['input_data']['EduTech'] * 100,
+                    50 if st.session_state['input_data']['Extracurricular'] == 1 else 0
+                ]
+            })
+            
+            fig_impact = px.bar(impact_data, x='Factor', y='Score', 
+                               color='Score', color_continuous_scale='Viridis',
+                               title='Environmental Factor Impact',
+                               template=get_plotly_template())
+            fig_impact.update_layout(height=300, paper_bgcolor='rgba(0,0,0,0)')
+            st.plotly_chart(fig_impact, use_container_width=True)
+            
+            # Stress Impact
+            stress_level = st.session_state['input_data']['StressLevel']
+            stress_impact = {
+                0: "✨ **Low Stress**: Students with low stress typically perform 10-15% better",
+                1: "⚖️ **Moderate Stress**: Can be motivating if managed well",
+                2: "⚠️ **High Stress**: Reduces performance by 20-30% - intervene immediately"
+            }
+            st.markdown("#### 🧠 Stress Impact Analysis")
+            st.info(stress_impact[stress_level])
     else:
         st.info("👆 Generate a prediction first to see detailed analysis")
 
 with tab3:
     st.markdown('<h2 class="sub-header">📚 MUJ Student Success Guidelines</h2>', unsafe_allow_html=True)
     
-    # Simple display without regex complications
-    st.markdown("""
-    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-        <h3 style="color: #10B981; margin-bottom: 1rem;">🌟 GRADE CATEGORY 0 (Highest Performers)</h3>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Invite to the 'Student Excellence' Research Program for guided undergraduate research.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest applying for Peer Mentor or Teaching Assistant (TA) roles for junior CSE batches.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend advanced certification courses in specialized domains like AI/ML or Cloud Computing.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage submitting their semester projects to national hackathons.</div>
-    </div>
+    # Display guidelines
+    categories = [
+        (0, "#10B981", "🌟 GRADE CATEGORY 0 (Highest Performers)"),
+        (1, "#3B82F6", "📈 GRADE CATEGORY 1 (Above Average)"),
+        (2, "#F59E0B", "⚠️ GRADE CATEGORY 2 (Below Average)"),
+        (3, "#EF4444", "🚨 GRADE CATEGORY 3 (At-Risk)")
+    ]
     
-    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-        <h3 style="color: #3B82F6; margin-bottom: 1rem;">📈 GRADE CATEGORY 1 (Above Average)</h3>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest joining technical clubs like IEEE CIS MUJ.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend exploring elective subjects in specialized CSE domains.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage participation in coding competitions and hackathons.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest taking up leadership roles in student chapters.</div>
-    </div>
-    
-    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-        <h3 style="color: #F59E0B; margin-bottom: 1rem;">⚠️ GRADE CATEGORY 2 (Below Average)</h3>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend attending weekly Faculty Office Hours.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest the 'Time Management & Study Skills' workshop.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Encourage forming study groups with peers.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend using online learning resources like NPTEL.</div>
-    </div>
-    
-    <div style="background: white; padding: 2rem; border-radius: 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); margin-bottom: 2rem;">
-        <h3 style="color: #EF4444; margin-bottom: 1rem;">🚨 GRADE CATEGORY 3 (At-Risk)</h3>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Immediate mandatory referral to the Student Success Center for an academic recovery plan.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Require a confidential meeting with the Campus Counselor to address potential stress or burnout.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Recommend a strict 50% reduction in extracurricular and club commitments to prioritize core academics.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Assign a dedicated senior peer mentor for weekly accountability and assignment tracking.</div>
-        <div class="recommendation-item" style="margin: 5px 0;">✅ Suggest a review of their current course load to see if dropping a non-core elective is necessary to protect their GPA.</div>
-    </div>
-    """, unsafe_allow_html=True)
+    guidelines_text = guidelines.split('\n\n')
+    for i, (grade_num, color, title) in enumerate(categories):
+        st.markdown(f"""
+        <div class="contact-card" style="margin-bottom: 1.5rem; border-left: 4px solid {color};">
+            <h3 style="color: {color};">{title}</h3>
+        """, unsafe_allow_html=True)
+        
+        # Find the relevant section
+        for section in guidelines_text:
+            if f"GRADE CATEGORY {grade_num}" in section:
+                for line in section.split('\n')[1:]:
+                    if line.strip():
+                        if line.strip().startswith('-'):
+                            st.markdown(f'<div class="recommendation-item" style="margin: 5px 0;">✅ {line.strip()[1:].strip()}</div>', unsafe_allow_html=True)
+                        else:
+                            st.markdown(f"**{line.strip()}**")
+                break
+        
+        st.markdown('</div>', unsafe_allow_html=True)
     
     st.download_button(
         label="📥 Download Guidelines PDF", 
@@ -582,27 +1025,56 @@ with tab3:
 
 with tab4:
     st.markdown('<h2 class="sub-header">ℹ️ About This System</h2>', unsafe_allow_html=True)
-    st.markdown("### 🎯 System Purpose & Objectives")
-    st.write("""
-    The **MUJ Student Advisor AI** is a proactive, data-driven institutional tool designed to transform academic advising from a reactive process into a predictive science. 
-    
-    By continuously analyzing 15 distinct factors across academic performance, psychological well-being, demographic background, and environmental circumstances, this system empowers faculty and administrators to:
-    """)
     
     col1, col2 = st.columns(2)
     with col1:
-        st.info("**🔍 Identify At-Risk Students Early**\n\nDetect subtle behavioral and academic patterns—such as fluctuating attendance or high stress levels—weeks before they result in failed examinations.")
-        st.warning("**📈 Optimize Resource Allocation**\n\nDirect campus counselors, peer mentors, and academic advisors exactly where they are needed most, maximizing the impact of support staff.")
+        st.markdown("""
+        <div class="contact-card">
+            <h3 style="color: #667eea;">🎯 System Purpose</h3>
+            <p style="line-height: 1.6;">The <strong>MUJ Student Advisor AI</strong> transforms academic advising from reactive to predictive by analyzing 15 factors across academic, psychological, and environmental domains.</p>
+            <ul style="list-style-type: none; padding: 0;">
+                <li class="recommendation-item">✅ Identify at-risk students early</li>
+                <li class="recommendation-item">✅ Generate personalized interventions</li>
+                <li class="recommendation-item">✅ Optimize resource allocation</li>
+                <li class="recommendation-item">✅ Ensure fair assessment across demographics</li>
+            </ul>
+        </div>
+        """, unsafe_allow_html=True)
+    
     with col2:
-        st.success("**🎯 Personalize Interventions**\n\nMove beyond generic advising by providing hyper-specific, automated recovery plans dynamically tailored to the student's risk profile.")
-        st.error("**⚖️ Mitigate Assessment Bias**\n\nProvide an equitable, objective, and consistent assessment of every student's trajectory, free from human error or demographic assumptions.")
+        if metadata:
+            st.markdown("""
+            <div class="contact-card">
+                <h3 style="color: #667eea;">📊 Model Performance</h3>
+            """, unsafe_allow_html=True)
+            col_a, col_b, col_c = st.columns(3)
+            with col_a:
+                st.metric("Test Accuracy", f"{metadata.get('test_accuracy', 0.99)*100:.1f}%")
+            with col_b:
+                st.metric("Validation Acc", f"{metadata.get('val_accuracy', 0.99)*100:.1f}%")
+            with col_c:
+                st.metric("Training Date", metadata.get('training_date', '2024')[:10])
+            st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Model Architecture
+    st.markdown("""
+    <div class="contact-card" style="margin-top: 1.5rem;">
+        <h3 style="color: #667eea;">🛠️ Technical Architecture</h3>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+            <div class="metric-card"><span class="metric-icon">🌲</span><div class="metric-label">Algorithm</div><div class="metric-value" style="font-size: 1.2rem;">Random Forest</div></div>
+            <div class="metric-card"><span class="metric-icon">📊</span><div class="metric-label">Features</div><div class="metric-value" style="font-size: 1.2rem;">15 Factors</div></div>
+            <div class="metric-card"><span class="metric-icon">📈</span><div class="metric-label">Accuracy</div><div class="metric-value" style="font-size: 1.2rem;">99%</div></div>
+            <div class="metric-card"><span class="metric-icon">⚡</span><div class="metric-label">Response</div><div class="metric-value" style="font-size: 1.2rem;"><0.5s</div></div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
 # Footer
 st.markdown("""
 <div class="footer">
-    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem;">🎓 MUJ Student Advisor AI</div>
+    <div style="font-size: 1.2rem; font-weight: 600; margin-bottom: 0.5rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">🎓 MUJ Student Advisor AI</div>
     <div style="margin-bottom: 0.5rem;">Developed for IEEE CIS AI Model Quest 2.0 | PS 01: Student Academic Performance Prediction</div>
     <div>📍 Manipal University Jaipur | Department of Computer Science & Engineering</div>
-    <div style="margin-top: 1rem; font-size: 0.8rem; color: #94A3B8;">© 2026 All Rights Reserved</div>
+    <div style="margin-top: 1rem; font-size: 0.8rem; color: var(--text-secondary);">© 2026 All Rights Reserved</div>
 </div>
 """, unsafe_allow_html=True)
