@@ -764,16 +764,29 @@ with tab1:
     for col, demo in zip(demo_cols, demos):
         with col:
             st.markdown(f"""
-            <div class="feature-card" style="text-align: center; border-left: 4px solid {demo['color']};">
-                <h4 style="margin-bottom: 1rem; color: {demo['color']};">{demo['name']}</h4>
-                <p style="margin: 0.2rem 0;">📋 Exam: {demo['ExamScore']}</p>
-                <p style="margin: 0.2rem 0;">📊 Att: {demo['Attendance']}%</p>
-                <p style="margin: 0.2rem 0;">📚 Study: {demo['StudyHours']}h</p>
+            <div class="feature-card" style="
+                text-align: center; 
+                border-left: 4px solid {demo['color']};
+                height: 160px;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+            ">
+                <h4 style="
+                    margin-bottom: 0.75rem; 
+                    color: {demo['color']};
+                    font-size: 0.95rem;
+                    white-space: nowrap;
+                ">{demo['name']}</h4>
+                <p style="margin: 0.15rem 0; font-size: 0.85rem;">📋 Exam: {demo['ExamScore']}</p>
+                <p style="margin: 0.15rem 0; font-size: 0.85rem;">📊 Att: {demo['Attendance']}%</p>
+                <p style="margin: 0.15rem 0; font-size: 0.85rem;">📚 Study: {demo['StudyHours']}h</p>
             </div>
             """, unsafe_allow_html=True)
-            
+        
             st.button(
-                f"Load {demo['name'].split()[1]}", 
+                f"{demo['name'].split()[1]}", 
                 key=f"demo_tab1_{demo['name']}", 
                 use_container_width=True,
                 on_click=apply_demo_profile,
@@ -790,28 +803,63 @@ with tab1:
     col1, col2, col3 = st.columns(3)
     with col1:
         st.markdown('<p class="section-header">📚 Academic</p>', unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="feature-card"><span class="feature-icon">📚</span><span class="feature-label">Study Hours</span><br><span class="feature-value">{input_data['StudyHours']} hrs/week</span></div>
-        <div class="feature-card"><span class="feature-icon">📊</span><span class="feature-label">Attendance</span><br><span class="feature-value">{input_data['Attendance']}%</span></div>
-        <div class="feature-card"><span class="feature-icon">📝</span><span class="feature-label">Assignment Completion</span><br><span class="feature-value">{input_data['AssignmentCompletion']}%</span></div>
-        <div class="feature-card"><span class="feature-icon">📋</span><span class="feature-label">Exam Score</span><br><span class="feature-value">{input_data['ExamScore']}</span></div>
-        """, unsafe_allow_html=True)
+        for icon, label, value in [
+            ("📚", "Study Hours", f"{input_data['StudyHours']} hrs/week"),
+            ("📊", "Attendance", f"{input_data['Attendance']}%"),
+            ("📝", "Assignments", f"{input_data['AssignmentCompletion']}%"),
+            ("📋", "Exam Score", f"{input_data['ExamScore']}"),
+        ]:
+            st.markdown(f"""
+            <div class="feature-card" style="
+                display:flex; align-items:center; gap:14px;
+                height:64px; padding:0 16px;">
+                <span style="font-size:1.4rem">{icon}</span>
+                <div style="flex:1; min-width:0;">
+                    <div class="feature-label" style="font-size:.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{label}</div>
+                    <div class="feature-value" style="font-size:1rem;">{value}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
     with col2:
         st.markdown('<p class="section-header">🧠 Psychological</p>', unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="feature-card"><span class="feature-icon">🎯</span><span class="feature-label">Motivation</span><br><span class="feature-value">{FEATURE_INFO['Motivation']['options'][input_data['Motivation']]}</span></div>
-        <div class="feature-card"><span class="feature-icon">😰</span><span class="feature-label">Stress Level</span><br><span class="feature-value">{FEATURE_INFO['StressLevel']['options'][input_data['StressLevel']]}</span></div>
-        <div class="feature-card"><span class="feature-icon">🧠</span><span class="feature-label">Learning Style</span><br><span class="feature-value">{FEATURE_INFO['LearningStyle']['options'][input_data['LearningStyle']]}</span></div>
-        <div class="feature-card"><span class="feature-icon">🎂</span><span class="feature-label">Age</span><br><span class="feature-value">{input_data['Age']} years</span></div>
-        """, unsafe_allow_html=True)
+        for icon, label, value in [
+            ("🎯", "Motivation", FEATURE_INFO['Motivation']['options'][input_data['Motivation']]),
+            ("😰", "Stress Level", FEATURE_INFO['StressLevel']['options'][input_data['StressLevel']]),
+            ("🧠", "Learning Style", FEATURE_INFO['LearningStyle']['options'][input_data['LearningStyle']]),
+            ("🎂", "Age", f"{input_data['Age']} years"),
+        ]:
+            st.markdown(f"""
+            <div class="feature-card" style="
+                display:flex; align-items:center; gap:14px;
+                height:64px; padding:0 16px;">
+                <span style="font-size:1.4rem">{icon}</span>
+                <div style="flex:1; min-width:0;">
+                    <div class="feature-label" style="font-size:.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{label}</div>
+                    <div class="feature-value" style="font-size:1rem;">{value}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+
     with col3:
         st.markdown('<p class="section-header">🌐 Environmental</p>', unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="feature-card"><span class="feature-icon">🌐</span><span class="feature-label">Internet Access</span><br><span class="feature-value">{FEATURE_INFO['Internet']['options'][input_data['Internet']]}</span></div>
-        <div class="feature-card"><span class="feature-icon">📖</span><span class="feature-label">Learning Resources</span><br><span class="feature-value">{FEATURE_INFO['Resources']['options'][input_data['Resources']]}</span></div>
-        <div class="feature-card"><span class="feature-icon">💻</span><span class="feature-label">Online Courses</span><br><span class="feature-value">{input_data['OnlineCourses']}</span></div>
-        <div class="feature-card"><span class="feature-icon">⚽</span><span class="feature-label">Extracurricular</span><br><span class="feature-value">{FEATURE_INFO['Extracurricular']['options'][input_data['Extracurricular']]}</span></div>
-        """, unsafe_allow_html=True)
+        for icon, label, value in [
+            ("🌐", "Internet", FEATURE_INFO['Internet']['options'][input_data['Internet']]),
+            ("📖", "Resources", FEATURE_INFO['Resources']['options'][input_data['Resources']]),
+            ("💻", "Online Courses", f"{input_data['OnlineCourses']}"),
+            ("⚽", "Extracurricular", FEATURE_INFO['Extracurricular']['options'][input_data['Extracurricular']]),
+        ]:
+            st.markdown(f"""
+            <div class="feature-card" style="
+                display:flex; align-items:center; gap:14px;
+                height:64px; padding:0 16px;">
+                <span style="font-size:1.4rem">{icon}</span>
+                <div style="flex:1; min-width:0;">
+                    <div class="feature-label" style="font-size:.7rem; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{label}</div>
+                    <div class="feature-value" style="font-size:1rem;">{value}</div>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
     
     if 'prediction' in st.session_state:
         st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
@@ -835,22 +883,57 @@ with tab1:
             """, unsafe_allow_html=True)
         
         with col2:
-            st.markdown("#### 📊 Confidence Meter")
-            for i, prob in enumerate(probabilities):
-                st.markdown(f"""
-                <div class="confidence-item">
-                    <div class="confidence-label"><span>{GRADE_INFO[i]['short']}</span><span>{prob:.1%}</span></div>
-                    <div class="confidence-bar-bg"><div class="confidence-bar-fill" style="width: {prob*100}%; background: {GRADE_INFO[i]['color']};"></div></div>
-                </div>
-                """, unsafe_allow_html=True)
+            # Build confidence bars
+            bars_html = ""
+            for i in range(4):
+                glow = f"box-shadow:0 0 6px {GRADE_INFO[i]['color']};" if i == pred else ""
+                weight = "700" if i == pred else "400"
+                text_color = "#fff" if i == pred else "var(--text-muted)"
+                opacity = "1" if i == pred else "0.4"
+                width = f"{probabilities[i]*100:.1f}"
+                pct = f"{probabilities[i]:.1%}"
+                name = GRADE_INFO[i]['name']
+                color = GRADE_INFO[i]['color']
         
+                bars_html += (
+                    f'<div style="margin-bottom:12px;">'
+                    f'<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;">'
+                    f'<div style="display:flex;align-items:center;gap:8px;">'
+                    f'<div style="width:8px;height:8px;border-radius:50%;background:{color};{glow}"></div>'
+                    f'<span style="font-size:.82rem;font-weight:{weight};color:{text_color};">{name}</span>'
+                    f'</div>'
+                    f'<span style="font-size:.82rem;font-weight:700;color:{color};">{pct}</span>'
+                    f'</div>'
+                    f'<div style="background:rgba(255,255,255,.07);border-radius:4px;height:6px;width:100%;overflow:hidden;">'
+                    f'<div style="width:{width}%;height:6px;border-radius:4px;background:{color};opacity:{opacity};"></div>'
+                    f'</div>'
+                    f'</div>'
+                )
+
+            # Render opening card
+            st.markdown(
+                '<div style="background:var(--card-bg);border:1px solid var(--border-color);'
+                'border-radius:16px;padding:15px;">'
+                '<div style="font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;'
+                'color:var(--text-muted);margin-bottom:10px;font-weight:600;margin-top: 10px">Confidence Breakdown</div>',
+                unsafe_allow_html=True
+            )
+    
+            # Render bars
+            st.markdown(bars_html, unsafe_allow_html=True)
+    
+            # Close card
+            st.markdown('</div>', unsafe_allow_html=True) 
+        
+
+        #######
         st.markdown('<div class="custom-divider"></div>', unsafe_allow_html=True)
         
         col1, col2 = st.columns([1, 1], gap="large")
         
         with col1:
             st.markdown('<h2 class="sub-header">📋 Personalized Success Plan</h2>', unsafe_allow_html=True)
-            st.markdown('<div class="contact-card" style="min-height: 280px;">', unsafe_allow_html=True)
+            #st.markdown('<div class="contact-card" style="min-height: 280px;">', unsafe_allow_html=True)
             
             if pred == 0:
                 st.markdown("""
@@ -887,13 +970,13 @@ with tab1:
         with col2:
             st.markdown('<h2 class="sub-header">📞 Contact Points</h2>', unsafe_allow_html=True)
             if pred == 0:
-                st.markdown("""<div class="contact-card" style="min-height: 280px;"><div class="contact-title">👨‍🏫 Research Coordinator</div><div class="contact-detail"><strong>Dr. Rajesh Kumar</strong></div><div class="contact-detail">📧 rajesh.kumar@muj.edu</div><div class="contact-detail">📍 AB-1, Room 204</div></div>""", unsafe_allow_html=True)
+                st.markdown("""<div class="contact-card" style="min-height: 180px;"><div class="contact-title">👨‍🏫 Research Coordinator</div><div class="contact-detail"><strong>Dr. Rajesh Kumar</strong></div><div class="contact-detail">📧 rajesh.kumar@muj.edu</div><div class="contact-detail">📍 AB-1, Room 204</div></div>""", unsafe_allow_html=True)
             elif pred == 1:
-                st.markdown("""<div class="contact-card" style="min-height: 280px;"><div class="contact-title">🤖 IEEE CIS MUJ</div><div class="contact-detail"><strong>Prof. Priya Sharma</strong></div><div class="contact-detail">📧 priya.sharma@muj.edu</div><div class="contact-detail">📍 AB-2, Room 105</div></div>""", unsafe_allow_html=True)
+                st.markdown("""<div class="contact-card" style="min-height: 180px;"><div class="contact-title">🤖 IEEE CIS MUJ</div><div class="contact-detail"><strong>Prof. Priya Sharma</strong></div><div class="contact-detail">📧 priya.sharma@muj.edu</div><div class="contact-detail">📍 AB-2, Room 105</div></div>""", unsafe_allow_html=True)
             elif pred == 2:
-                st.markdown("""<div class="contact-card" style="min-height: 280px;"><div class="contact-title">👨‍🏫 Academic Advisor</div><div class="contact-detail"><strong>Dr. Amit Patel</strong></div><div class="contact-detail">🕒 Tue/Thu 2-4 PM</div><div class="contact-detail">📍 AB-1, Room 305</div></div>""", unsafe_allow_html=True)
+                st.markdown("""<div class="contact-card" style="min-height: 180px;"><div class="contact-title">👨‍🏫 Academic Advisor</div><div class="contact-detail"><strong>Dr. Amit Patel</strong></div><div class="contact-detail">🕒 Tue/Thu 2-4 PM</div><div class="contact-detail">📍 AB-1, Room 305</div></div>""", unsafe_allow_html=True)
             else:
-                st.markdown("""<div class="contact-card" style="min-height: 280px;"><div class="contact-title">🆘 Student Success Center</div><div class="contact-detail">📧 success@muj.edu</div><div class="contact-detail">📞 +91-123-4567890</div><div class="contact-detail">📍 Student Services Block</div></div>""", unsafe_allow_html=True)
+                st.markdown("""<div class="contact-card" style="min-height: 180px;"><div class="contact-title">🆘 Student Success Center</div><div class="contact-detail">📧 success@muj.edu</div><div class="contact-detail">📞 +91-123-4567890</div><div class="contact-detail">📍 Student Services Block</div></div>""", unsafe_allow_html=True)
     else:
         st.info("👆 Load a demo profile above or click 'GENERATE SUCCESS PLAN' in the sidebar to see prediction results.")
 
@@ -905,13 +988,24 @@ with tab2:
             if metadata and 'feature_importance' in metadata:
                 st.markdown("#### 🔍 Top Predictive Features")
                 import_df = pd.DataFrame(metadata['feature_importance']).head(8)
-                fig = px.bar(import_df, x='importance', y='feature', orientation='h', 
-                           title='Most Important Factors', color='importance', 
-                           color_continuous_scale='Viridis',
-                           template=get_plotly_template())
-                fig.update_layout(height=400, showlegend=False, 
-                                paper_bgcolor='rgba(0,0,0,0)', 
-                                plot_bgcolor='rgba(0,0,0,0)')
+                fig = px.bar(
+                    import_df,
+                    x='importance',
+                    y='feature',
+                    orientation='h',
+                    title='Most Important Factors',
+                    color='importance',
+                    color_continuous_scale='Viridis',
+                    template=get_plotly_template()
+                )
+                fig.update_layout(
+                    height=400,
+                    showlegend=False,
+                    paper_bgcolor='rgba(0,0,0,0)',
+                    plot_bgcolor='rgba(0,0,0,0)',
+                    xaxis=dict(type='log'),  # ← this is the key fix
+                    yaxis=dict(categoryorder='total ascending')
+                )
                 st.plotly_chart(fig, use_container_width=True)
             
             # Radar Chart
@@ -925,17 +1019,39 @@ with tab2:
                 (st.session_state['input_data']['Discussions'] * 100) if isinstance(st.session_state['input_data']['Discussions'], int) else 50
             ]
             
+            pred_color = GRADE_INFO[st.session_state['prediction']]['color']
+            r, g, b = tuple(int(pred_color.lstrip('#')[i:i+2], 16) for i in (0, 2, 4))
+
             fig_radar = go.Figure(data=go.Scatterpolar(
-                r=radar_values, theta=radar_metrics, fill='toself',
-                line_color=GRADE_INFO[st.session_state['prediction']]['color'],
-                fillcolor=f"rgba{tuple(int(GRADE_INFO[st.session_state['prediction']]['color'].lstrip('#')[i:i+2], 16) for i in (0, 2, 4)) + (0.3,)}"
+                r=radar_values + [radar_values[0]],  # close the shape
+                theta=radar_metrics + [radar_metrics[0]],
+                fill='toself',
+                line=dict(color=pred_color, width=2),
+                fillcolor=f"rgba({r},{g},{b},0.25)",
+                marker=dict(size=6, color=pred_color)
             ))
+
             fig_radar.update_layout(
-                polar=dict(radialaxis=dict(visible=True, range=[0, 100])),
-                showlegend=False, height=350,
+                polar=dict(
+                    bgcolor='rgba(0,0,0,0)',  # transparent background
+                    radialaxis=dict(
+                        visible=True,
+                        range=[0, 100],
+                        tickfont=dict(size=10, color='rgba(255,255,255,0.4)'),
+                        gridcolor='rgba(255,255,255,0.1)',
+                        linecolor='rgba(255,255,255,0.1)',
+                        tickvals=[20, 40, 60, 80, 100],
+                    ),
+                    angularaxis=dict(
+                        tickfont=dict(size=13, color='rgba(255,255,255,0.85)'),
+                        gridcolor='rgba(255,255,255,0.1)',
+                        linecolor='rgba(255,255,255,0.15)',
+                    )
+                ),
+                showlegend=False,
+                height=380,
                 paper_bgcolor='rgba(0,0,0,0)',
-                margin=dict(l=80, r=80, t=40, b=40),
-                template=get_plotly_template()
+                margin=dict(l=60, r=60, t=30, b=30),
             )
             st.plotly_chart(fig_radar, use_container_width=True)
         
@@ -948,11 +1064,24 @@ with tab2:
                 ("Study Hours", st.session_state['input_data']['StudyHours'], 20, "📚"),
                 ("Assignment Completion", st.session_state['input_data']['AssignmentCompletion'], 85, "📝")
             ]
+            
             for name, value, avg, icon in metrics:
                 diff = value - avg
-                diff_class = "diff-positive" if diff > 0 else "diff-negative" if diff < 0 else "diff-neutral"
-                st.markdown(f'<div class="metric-card"><div class="metric-icon">{icon}</div><div class="metric-label">{name}</div><div class="metric-value">{value}</div><div><span class="{diff_class}">{"+" if diff > 0 else ""}{diff:.1f} vs avg</span></div></div>', unsafe_allow_html=True)
-            
+                diff_color = "#10B981" if diff > 0 else "#EF4444" if diff < 0 else "#64748B"
+                bg_color = "rgba(16,185,129,.1)" if diff > 0 else "rgba(239,68,68,.1)" if diff < 0 else "rgba(100,116,139,.1)"
+                st.markdown(f"""
+                <div style="display:flex; justify-content:space-between; align-items:center;
+                    padding:12px 16px; border:1px solid var(--border-color);
+                    border-radius:12px; margin-bottom:8px; background:var(--card-bg);">
+                    <span style="font-size:1.1rem">{icon}</span>
+                    <span style="font-size:.85rem; color:var(--text-muted); flex:1; margin-left:10px">{name}</span>
+                    <span style="font-weight:700; color:var(--text-primary); margin-right:10px">{value}</span>
+                    <span style="font-size:.78rem; color:{diff_color}; background:{bg_color};
+                        padding:3px 10px; border-radius:20px">
+                            {"+" if diff > 0 else ""}{diff:.1f} vs avg
+                    </span>
+                </div>
+                """, unsafe_allow_html=True)            
             # Environmental Impact
             st.markdown("#### 🔍 Environmental Impact")
             impact_data = pd.DataFrame({
@@ -1026,35 +1155,38 @@ with tab3:
 with tab4:
     st.markdown('<h2 class="sub-header">ℹ️ About This System</h2>', unsafe_allow_html=True)
     
-    col1, col2 = st.columns(2)
-    with col1:
-        st.markdown("""
-        <div class="contact-card">
-            <h3 style="color: #667eea;">🎯 System Purpose</h3>
-            <p style="line-height: 1.6;">The <strong>MUJ Student Advisor AI</strong> transforms academic advising from reactive to predictive by analyzing 15 factors across academic, psychological, and environmental domains.</p>
-            <ul style="list-style-type: none; padding: 0;">
-                <li class="recommendation-item">✅ Identify at-risk students early</li>
-                <li class="recommendation-item">✅ Generate personalized interventions</li>
-                <li class="recommendation-item">✅ Optimize resource allocation</li>
-                <li class="recommendation-item">✅ Ensure fair assessment across demographics</li>
-            </ul>
+    st.markdown("""
+<div class="contact-card">
+    <h3 style="color: #667eea;">🎯 System Purpose</h3>
+    <p style="line-height: 1.8; font-size: 1rem; margin-bottom: 1.5rem;">
+        The <strong>MUJ Student Advisor AI</strong> transforms academic advising 
+        from reactive to predictive by analyzing 15 factors across academic, 
+        psychological, and environmental domains — enabling advisors to intervene 
+        early, allocate resources effectively, and ensure every student gets the 
+        support they need before it's too late.
+    </p>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Identify at-risk students early</span>
         </div>
-        """, unsafe_allow_html=True)
-    
-    with col2:
-        if metadata:
-            st.markdown("""
-            <div class="contact-card">
-                <h3 style="color: #667eea;">📊 Model Performance</h3>
-            """, unsafe_allow_html=True)
-            col_a, col_b, col_c = st.columns(3)
-            with col_a:
-                st.metric("Test Accuracy", f"{metadata.get('test_accuracy', 0.99)*100:.1f}%")
-            with col_b:
-                st.metric("Validation Acc", f"{metadata.get('val_accuracy', 0.99)*100:.1f}%")
-            with col_c:
-                st.metric("Training Date", metadata.get('training_date', '2024')[:10])
-            st.markdown('</div>', unsafe_allow_html=True)
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Generate personalized interventions</span>
+        </div>
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Optimize resource allocation</span>
+        </div>
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Ensure fair assessment across demographics</span>
+        </div>
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Support faculty with data-driven insights</span>
+        </div>
+        <div class="recommendation-item" style="display:flex; gap:10px; align-items:flex-start; padding:12px 16px; font-size:.875rem;">
+            <span style="flex-shrink:0;">✅</span><span>Reduce student dropout rates proactively</span>
+        </div>
+    </div>
+</div>
+""", unsafe_allow_html=True)
     
     # Model Architecture
     st.markdown("""
